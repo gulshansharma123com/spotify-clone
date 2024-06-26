@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify 2.0 Clone</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        .playlist,
+        .search-results,
+        .genres {
+            margin-bottom: 20px;
+        }
+
+        .song {
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Spotify 2.0 Clone</h1>
+        <div class="playlists">
+            <h2>Playlists</h2>
+            <ul id="playlist-list">
+                {% for playlist in playlists %}
+                <li>
+                    <a href="#" onclick="loadPlaylist({ playlistid })">{{ playlist.name }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="search">
+            <h2>Search</h2>
+            <input type="text" id="search-query" placeholder="Search for songs or artists" onkeyup="searchSongs()">
+            <div class="search-results" id="search-results"></div>
+        </div>
+        <div class="genres">
+            <h2>Genres</h2>
+            <ul id="genre-list"></ul>
+        </div>
+    </div>
+
+    <script>
+        async function loadPlaylist(playlistId) {
+            const response = await fetch(`/playlist/${playlistId}`);
+            const data = await response.json();
+            let playlistHtml = '<h3>' + data.playlist.name + '</h3>';
+            data.songs.forEach(song => {
+                playlistHtml += '<div class="song">' + song.title + ' by ' + song.artist + '</div>';
+            });
+            document.getElementById('playlist-list').innerHTML = playlistHtml;
+        }
+
+        async function searchSongs() {
+            const query = document.getElementById('search-query').value;
+            const response = await fetch(`/search?query=${query}`);
+            const results = await response.json();
+            let resultsHtml = '';
+            results.forEach(song => {
+                resultsHtml += '<div class="song">' + song.title + ' by ' + song.artist + '</div>';
+            });
+            document.getElementById('search-results').innerHTML = resultsHtml;
+        }
+
+        async function loadGenres() {
+            const response = await fetch('/genres');
+            const genres = await response.json();
+            let genresHtml = '';
+            genres.forEach(genre => {
+                genresHtml += '<li>' + genre + '</li>';
+            });
+            document.getElementById('genre-list').innerHTML = genresHtml;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadGenres();
+        });
+    </script>
+</body>
+
+</html>
